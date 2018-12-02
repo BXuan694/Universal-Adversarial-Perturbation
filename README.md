@@ -7,7 +7,7 @@ https://github.com/LTS4/DeepFool/tree/master/Python
 
 The dataset is based on Caltech256(http://www.vision.caltech.edu/Image_Datasets/Caltech256/)
 
-The model is ResNet50 trained on Caltech256 with accuracy about 96%. Some other models will be tested in the future.
+The model is ResNet50 trained on Caltech256 with accuracy about 96%. Some other models will be tested in the future. You can download from https://www.dropbox.com/sh/4xoujz0v5j8bt42/AAB_gF1fIwQ2KPA-JeAv8wqma?dl=0 and put it in ./checkpoint.
 
 The .npy perturbation file is of 3*224*224, a test picture must be transformed with cut() in trainfile.py and then added with which.
 
