@@ -41,8 +41,8 @@ for d in dirs:
 #print(len(val_data[0]))
 '''
 
-root='/home/wang/Dataset/Caltech256/'
-#root='/media/this/02ff0572-4aa8-47c6-975d-16c3b8062013/Caltech256/'
+#root='/home/wang/Dataset/Caltech256/'
+root='/media/this/02ff0572-4aa8-47c6-975d-16c3b8062013/Caltech256/'
 if not os.path.exists(root):
     print("No dataset found, please check!")
     sys.exit()
@@ -129,7 +129,7 @@ def test(epoch, val_batch):
         best_acc = acc
 
 def demo(path):
-    labels = open('./data/label.txt', 'r').read().split('\n')
+    labels = open('./data/labels.txt', 'r').read().split('\n')
     print(labels)
     net.eval()
     img=Image.open(path).convert('RGB')
