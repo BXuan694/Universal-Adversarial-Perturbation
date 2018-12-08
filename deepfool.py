@@ -5,7 +5,7 @@ import copy
 from torch.autograd.gradcheck import zero_gradients
 
 
-def deepfool(image, net, num_classes=10, overshoot=0.02, max_iter=50):
+def deepfool(image, net, num_classes, overshoot, max_iter):
 
     """
        :param image: Image of size HxWx3
