@@ -2,15 +2,27 @@ from deepfool import deepfool
 import os
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from PIL import Image
-from torch.autograd.gradcheck import zero_gradients
 import torch.backends.cudnn as cudnn
 import sys
 from transform_file import transform, cut, convert
-from targetmodel import ResNet50_ft, MyDataset
+from targetmodel import MyDataset
 
-def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, p=np.inf, num_class=10, overshoot=0.2, max_iter_df=10):
+def project_lp(v, xi, p):
+
+    if p==2:
+        pass
+    elif p == np.inf:
+        v=np.sign(v)*np.minimum(abs(v),xi)
+        #v = torch.sign(v) * torch.clamp(abs(v), 0, xi)
+    else:
+        raise ValueError("Values of a different from 2 and Inf are currently not surpported...")
+
+    return v
+
+
+def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, xi=10, p=np.inf, num_classes=10, overshoot=0.2, max_iter_df=10):
     '''
 
     :param path:
@@ -64,7 +76,8 @@ def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, p=np.i
     np.random.shuffle(order)
 
 
-    v = np.zeros((224, 224, 3), dtype=np.float32)
+    v=np.zeros([224,224,3])
+    #v = torch.zeros([224,224,3])
     fooling_rate = 0.0
     iter = 0
     labels = open('./data/labels.txt', 'r').read().split('\n')
@@ -80,7 +93,7 @@ def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, p=np.i
             #cur_img.show()
             torch.cuda.empty_cache()
 
-            per_img =  Image.fromarray(cut(cur_img)+v.astype(np.uint8))
+            per_img = Image.fromarray(cut(cur_img)+v.astype(np.uint8))
             per_img1 = convert(per_img)[np.newaxis, :].to(device)
             r1 = int(net(per_img1).max(1)[1])
             #print(labels[r1])
@@ -89,13 +102,15 @@ def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, p=np.i
 
             if r1 == r2:
                 print(">> k =", np.where(k==order)[0][0], ', pass #', iter, end='      ')
-                dr, iter_k, label, k_i, pert_image = deepfool(per_img1[0], net)
+                dr, iter_k, label, k_i, pert_image = deepfool(per_img1[0], net, num_classes=num_classes, overshoot=overshoot, max_iter=max_iter_df)
                 print('deepfool result: ', label, k_i)
 
                 if iter_k < max_iter_df-1:
+
                     v[:, :, 0] += dr[0, 0, :, :]
                     v[:, :, 1] += dr[0, 1, :, :]
                     v[:, :, 2] += dr[0, 2, :, :]
+                    v = project_lp(v, xi, p)
 
         iter = iter + 1
 
@@ -107,9 +122,9 @@ def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, p=np.i
             batch = 32
 
             test_data_orig = MyDataset(txt=testset, transform=transform)
-            test_loader_orig = DataLoader(dataset=test_data_orig, batch_size=batch)
+            test_loader_orig = DataLoader(dataset=test_data_orig, batch_size=batch, pin_memory=True)
             test_data_pert = MyDataset(txt=testset, pert=v, transform=transform)
-            test_loader_pert = DataLoader(dataset=test_data_pert, batch_size=batch)
+            test_loader_pert = DataLoader(dataset=test_data_pert, batch_size=batch, pin_memory=True)
 
             for batch_idx, (inputs, _) in enumerate(test_loader_orig):
                 inputs = inputs.to(device)
@@ -128,8 +143,5 @@ def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, p=np.i
             fooling_rate = float(torch.sum(est_labels_orig != est_labels_pert))/float(num_img_tst)
             print("FOOLING RATE: ", fooling_rate)
             np.save('v'+str(iter)+'_'+str(round(fooling_rate, 4)), v)
-        #fooling_rate = 1
 
-
-    #return np.zeros(shape=(224, 224, 3), dtype=np.float32)
     return v

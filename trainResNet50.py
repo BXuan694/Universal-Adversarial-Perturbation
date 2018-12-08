@@ -11,7 +11,7 @@ import torch.optim as optim
 from tqdm import tqdm
 import sys
 import math
-from targetmodel import ResNet50_ft, MyDataset
+from targetmodel import ResNet50_ft, MyDataset, root
 '''
 DATA_PATH="/media/this/02ff0572-4aa8-47c6-975d-16c3b8062013/Caltech256/256_ObjectCategories"
 if not os.path.exists(DATA_PATH):
@@ -41,18 +41,16 @@ for d in dirs:
 #print(len(val_data[0]))
 '''
 
-#root='/home/wang/Dataset/Caltech256/'
-root='/media/this/02ff0572-4aa8-47c6-975d-16c3b8062013/Caltech256/'
 if not os.path.exists(root):
     print("No dataset found, please check!")
     sys.exit()
 
 trn_batch=16
-val_batch=256
+val_batch=64
 train_data = MyDataset(txt=root+'dataset-trn.txt', transform=transform)
 test_data = MyDataset(txt=root+'dataset-val.txt', transform=transform)
-train_loader = DataLoader(dataset=train_data, batch_size=trn_batch, shuffle=True)
-test_loader = DataLoader(dataset=test_data, batch_size=val_batch)
+train_loader = DataLoader(dataset=train_data, batch_size=trn_batch, pin_memory=True, shuffle=True)
+test_loader = DataLoader(dataset=test_data, batch_size=val_batch, pin_memory=True)
 
 resnet = models.resnet50(pretrained=False)
 net = ResNet50_ft(resnet)

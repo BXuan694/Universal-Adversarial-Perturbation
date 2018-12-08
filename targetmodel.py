@@ -4,6 +4,8 @@ from torch.utils.data import Dataset
 import numpy as np
 from transform_file import cut
 
+root='/home/wang/Dataset/Caltech256/'
+#root='/media/this/02ff0572-4aa8-47c6-975d-16c3b8062013/Caltech256/'
 
 def default_loader(path):
     return Image.open(path).convert('RGB')

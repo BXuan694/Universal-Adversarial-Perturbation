@@ -7,9 +7,8 @@ from PIL import Image
 import torch.backends.cudnn as cudnn
 import sys
 from transform_file import transform,cut
-from targetmodel import ResNet50_ft
+from targetmodel import ResNet50_ft, root as PATH_DATASETS
 from generate import generate
-from torch.autograd.gradcheck import zero_gradients
 
 
 print('>> Loading network...')
@@ -17,10 +16,6 @@ resnet = models.resnet50(pretrained=False)
 net = ResNet50_ft(resnet)
 net.load_state_dict(torch.load('./checkpoint/ckpt96.498054.t7')['net'])
 net.eval()
-
-# path of datasets
-#PATH_DATASETS = '/home/wang/Dataset/Caltech256'
-PATH_DATASETS = '/media/this/02ff0572-4aa8-47c6-975d-16c3b8062013/Caltech256'
 
 print('>> Checking dataset...')
 if not os.path.exists(PATH_DATASETS):
@@ -41,9 +36,9 @@ print('>> Loading perturbation...')
 file_perturbation = 'data/universal.npy'
 if os.path.isfile(file_perturbation) == 0:
     print('   >> No perturbation found, computing...')
-    v = generate(PATH_DATASETS, 'dataset4u-trn.txt', 'dataset4u-val.txt', net, max_iter_uni=10, delta=0.2, p=np.inf, num_class=10, overshoot=0.2, max_iter_df=10)
+    v = generate(PATH_DATASETS, 'dataset4u-trn.txt', 'dataset4u-val.txt', net, max_iter_uni=1000, delta=0.2, p=np.inf, num_classes=10, overshoot=0.2, max_iter_df=10)
     # Saving the universal perturbation
-    np.save('./data/non.npy', v)
+    np.save('./data/universal.npy', v)
 else:
     print('   >> Found a pre-computed universal perturbation! Retrieving it from', file_perturbation)
     v = np.load(file_perturbation)[0]
