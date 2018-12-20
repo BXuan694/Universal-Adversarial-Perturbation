@@ -15,7 +15,6 @@ def project_lp(v, xi, p):
         pass
     elif p == np.inf:
         v=np.sign(v)*np.minimum(abs(v),xi)
-        #v = torch.sign(v) * torch.clamp(abs(v), 0, xi)
     else:
         raise ValueError("Values of a different from 2 and Inf are currently not surpported...")
 
@@ -77,10 +76,8 @@ def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, xi=10,
 
 
     v=np.zeros([224,224,3])
-    #v = torch.zeros([224,224,3])
     fooling_rate = 0.0
     iter = 0
-    labels = open('./data/labels.txt', 'r').read().split('\n')
 
     # start an epoch
     while fooling_rate < 1-delta and iter < max_iter_uni:
@@ -89,21 +86,16 @@ def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, xi=10,
             cur_img = Image.open(img_trn[k][0]).convert('RGB')
             cur_img1 = transform(cur_img)[np.newaxis, :].to(device)
             r2 = int(net(cur_img1).max(1)[1])
-            #print(labels[r2])
-            #cur_img.show()
             torch.cuda.empty_cache()
 
             per_img = Image.fromarray(cut(cur_img)+v.astype(np.uint8))
             per_img1 = convert(per_img)[np.newaxis, :].to(device)
             r1 = int(net(per_img1).max(1)[1])
-            #print(labels[r1])
-            #per_img.show()
             torch.cuda.empty_cache()
 
             if r1 == r2:
                 print(">> k =", np.where(k==order)[0][0], ', pass #', iter, end='      ')
                 dr, iter_k, label, k_i, pert_image = deepfool(per_img1[0], net, num_classes=num_classes, overshoot=overshoot, max_iter=max_iter_df)
-                print('deepfool result: ', label, k_i)
 
                 if iter_k < max_iter_df-1:
 

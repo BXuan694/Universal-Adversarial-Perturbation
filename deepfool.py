@@ -17,12 +17,8 @@ def deepfool(image, net, num_classes, overshoot, max_iter):
     """
     is_cuda = torch.cuda.is_available()
     if is_cuda:
-        print("Using GPU")
         image = image.cuda()
         net = net.cuda()
-    else:
-        print("Using CPU")
-
 
     f_image = net.forward(Variable(image[None, :, :, :], requires_grad=True)).data.cpu().numpy().flatten()
     I = f_image.argsort()[::-1]
@@ -39,7 +35,6 @@ def deepfool(image, net, num_classes, overshoot, max_iter):
 
     x = Variable(pert_image[None, :], requires_grad=True)
     fs = net.forward(x)
-    fs_list = [fs[0,I[k]] for k in range(num_classes)]
     k_i = label
 
     while k_i == label and loop_i < max_iter:

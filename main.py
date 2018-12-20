@@ -36,7 +36,7 @@ print('>> Loading perturbation...')
 file_perturbation = 'data/universal.npy'
 if os.path.isfile(file_perturbation) == 0:
     print('   >> No perturbation found, computing...')
-    v = generate(PATH_DATASETS, 'dataset4u-trn.txt', 'dataset4u-val.txt', net, max_iter_uni=1000, delta=0.2, p=np.inf, num_classes=10, overshoot=0.2, max_iter_df=10)
+    v = generate(PATH_DATASETS, 'dataset4u-trn.txt', 'dataset4u-val.txt', net, max_iter_uni=1000, delta=0.8, p=np.inf, num_classes=10, overshoot=0.2, max_iter_df=10)
     # Saving the universal perturbation
     np.save('./data/universal.npy', v)
 else:
