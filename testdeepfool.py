@@ -14,7 +14,7 @@ net.eval()
 im_orig = Image.open('./data/test_im2.jpg')
 
 im = transform(im_orig)
-r, loop_i, label_orig, label_pert, pert_image = deepfool(im, net)
+r, loop_i, label_orig, label_pert, pert_image = deepfool(im, net, 10, 0.2, 50)
 
 labels = open(os.path.join('./data/synset_words.txt'), 'r').read().split('\n')
 
