@@ -21,7 +21,7 @@ def project_lp(v, xi, p):
     return v
 
 
-def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, xi=10, p=np.inf, num_classes=10, overshoot=0.2, max_iter_df=10):
+def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, xi=10, p=np.inf, num_classes=10, overshoot=0.2, max_iter_df=20):
     '''
 
     :param path:
@@ -72,8 +72,6 @@ def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, xi=10,
     num_img_trn = len(img_trn)
     num_img_tst = len(img_tst)
     order = np.arange(num_img_trn)
-    np.random.shuffle(order)
-
 
     v=np.zeros([224,224,3])
     fooling_rate = 0.0
@@ -81,6 +79,7 @@ def generate(path, dataset, testset, net, delta=0.2, max_iter_uni=np.inf, xi=10,
 
     # start an epoch
     while fooling_rate < 1-delta and iter < max_iter_uni:
+        np.random.shuffle(order)
         print("Starting pass number ", iter)
         for k in order:
             cur_img = Image.open(img_trn[k][0]).convert('RGB')
